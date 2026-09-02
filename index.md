@@ -15,3 +15,5 @@ o que ela realmente é, e o que eu for aprendendo pelo meio.
 
 - [1. O que eu achava que era Computação Visual](01_cv.html) — 17/08/2026
 - [2. Como o computador "enxerga" uma imagem](02_como_o_computador_enxerga.html) — 17/08/2026
+- [3. Transformação de intensidade: o negativo de uma imagem](03_negativo_de_uma_imagem.html) — 01/09/2026
+- [4. Melhorando o contraste da foto revelada](04_melhorando_o_contraste.html) — 15/09/2026
