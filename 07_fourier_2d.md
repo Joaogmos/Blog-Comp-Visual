@@ -1,121 +1,79 @@
-# Olhando uma imagem pelo espectro de Fourier
+# A transformada de Fourier aplicada a imagens
 
-*13/10/2026*
+*29/09/2026*
 
-Até aqui eu tratei a imagem como uma grade de pixels. A transformada de
-Fourier olha a mesma imagem como uma soma de ondas: variação lenta é frequência
-baixa, e detalhe fino e bordas são frequência alta. Usei isso em dois testes,
-um filtro passa-baixa e a remoção de listras periódicas.
+No post 2 eu comentei que os filtros olham para a vizinhança de cada pixel. Pesquisando
+mais, descobri que existe outro jeito de olhar para o mesmo problema: em vez
+de pensar nos pixels, pensar nas frequências que compõem a imagem. Esse jeito
+usa a transformada de Fourier.
 
-## A pergunta
+## A ideia
 
-O que o espectro de uma imagem mostra, e dá para limpar uma imagem só mexendo
-no espectro?
+Joseph Fourier propôs, no começo do século XIX, que uma função pode ser escrita
+como uma soma de senos e cossenos de frequências diferentes. Para imagens, a
+leitura é a seguinte:
 
-## O teste
+- frequências baixas são as variações lentas, como o fundo liso e as grandes
+  regiões de mesma cor;
+- frequências altas são as mudanças rápidas, como bordas, texturas e ruído.
 
-Imagem 256x256 feita em Python: fundo cinza, um círculo, um retângulo escuro,
-uma linha e o texto "Fourier". Depois criei uma segunda versão somando uma
-onda senoidal (listras diagonais) à imagem.
+A transformada discreta 2D de uma imagem `f(x, y)` de tamanho `M x N` é:
 
-Código completo: [`codigo/fourier_2d.py`](codigo/fourier_2d.py).
-
-![Imagem de teste](img/07/original.png)
-
-## Como implementei
-
-O NumPy já tem a FFT 2D, então a parte que escrevi foi o entorno: centralizar,
-visualizar e aplicar as máscaras.
-
-```python
-def espectro(img):
-    return np.fft.fftshift(np.fft.fft2(img.astype(np.float64)))
-
-def para_imagem(F):
-    return np.clip(np.real(np.fft.ifft2(np.fft.ifftshift(F))), 0, 255).astype(np.uint8)
-
-def visualizar(F):                       # escala logarítmica, senão só o centro aparece
-    m = np.log1p(np.abs(F))
-    return (255 * m / m.max()).astype(np.uint8)
+```
+F(u, v) = Σ Σ f(x, y) · e^(−j2π(ux/M + vy/N))
 ```
 
-O `fftshift` leva a frequência zero para o centro da imagem. Fazendo a ida e a
-volta sem nenhum filtro, a diferença máxima para a original foi de 1 nível de
-cinza (arredondamento).
+O resultado `F(u, v)` diz quanto de cada frequência existe na imagem. Em
+implementações reais se usa a FFT (transformada rápida de Fourier, de Cooley e
+Tukey, 1965), que reduz o custo de O(N²) para O(N log N).
 
-Espectro da imagem de teste:
+## Como ler o espectro
 
-![Espectro](img/07/espectro.png)
+Depois de reorganizar o resultado para deixar a frequência zero no centro, o
+espectro mostra:
 
-O centro é a média de brilho e as frequências crescem para fora. Os riscos em
-cruz vêm das bordas retas do retângulo e da linha.
+- o ponto central, que é a média de brilho da imagem;
+- as frequências crescendo do centro para as bordas;
+- linhas em cruz quando a imagem tem bordas retas, porque uma borda reta
+  concentra energia numa direção do espectro.
 
-## Resultados
+Como os valores variam muito, o espectro costuma ser exibido em escala
+logarítmica, senão só o centro aparece.
 
-### Passa-baixa: cortar as frequências altas
+## Filtrar no espectro
 
-Testei dois filtros no espectro: o ideal (zera tudo fora de um raio `r`) e o
-gaussiano (atenua suavemente).
+O teorema da convolução diz que convoluir uma imagem com um kernel equivale a
+multiplicar os espectros. Ou seja, a convolução do post 2, com um kernel de
+suavização, pode ser vista como uma máscara que atenua as frequências altas. Alguns filtros no
+domínio da frequência:
 
-![Passa-baixa ideal e gaussiano](img/07/passa_baixa.png)
+- **Passa-baixa ideal:** zera tudo fora de um raio do centro. Tem o problema de
+  gerar ondulações em volta das bordas (efeito de anel, ou *ringing*), porque
+  o corte é abrupto.
+- **Gaussiano:** atenua de forma gradual e não produz o anel.
+- **Butterworth:** fica entre os dois, com uma ordem que controla o quão
+  abrupto é o corte.
+- **Passa-alta:** faz o inverso, deixando bordas e detalhes.
 
-| Raio / sigma | Ideal | Gaussiana |
-|---|---|---|
-| 10 | 20,32 dB | 21,39 dB |
-| 30 | 25,03 dB | 26,91 dB |
+Outra aplicação que achei legal é a remoção de ruído periódico. Um padrão
+repetido, como listras, aparece no espectro como pontos brilhantes isolados.
+Dá para zerar só esses pontos (filtro *notch*) e a listra some sem afetar o
+resto da imagem, coisa difícil de fazer direto nos pixels.
 
-O filtro ideal deixa ondulações em volta das bordas (efeito de anel,
-*ringing*). Faz sentido: cortar o espectro de forma brusca equivale, no espaço,
-a convoluir com uma função que oscila. A gaussiana não tem esse problema e teve
-PSNR maior nos dois casos.
+## O que eu aprendi
 
-Conferi também que a gaussiana no domínio da frequência é o mesmo que um
-borrão gaussiano comum: comparando com `cv2.GaussianBlur` (sigma 2 no espaço),
-a diferença máxima foi de 2 níveis de cinza (PSNR de 51,5 dB). É o teorema da
-convolução funcionando: convolução no espaço é multiplicação na frequência.
-
-### Remover listras periódicas
-
-Com as listras somadas, o espectro ganha dois pontos brilhantes isolados,
-simétricos em relação ao centro:
-
-![Listras, espectro e resultado](img/07/listras.png)
-
-Procurei o pico mais forte fora da região central: ele apareceu em
-`(u, v) = (-23, -8)`, e o simétrico é `(23, 8)`. Eu tinha criado as listras com
-frequência 0,09 e 0,03 ciclos por pixel, que multiplicadas por 256 dão cerca
-de `(23, 8)`, então o pico está onde deveria. Zerei uma janela 5x5 em volta dos
-dois picos e voltei para a imagem:
-
-| | PSNR |
-|---|---|
-| Com listras | 20,40 dB |
-| Depois de zerar os picos | 31,46 dB |
-
-As listras praticamente sumiram, e o resto da imagem ficou intacto. Ainda dá
-para ver um resto bem fraco de ondulação (visível na figura), porque a janela
-que zerei é pequena e as listras não caem exatamente em um único ponto do
-espectro.
-
-## Conclusões
-
-Ruído periódico é difícil de tirar direto na imagem, mas no espectro ele vira
-poucos pontos que dá para achar e apagar. O filtro com corte brusco deixa anéis
-em volta das bordas, então vale trocar por uma curva suave. E filtrar com
-kernel no espaço ou com máscara no espectro dá o mesmo resultado, só muda o
-lado de onde se olha.
-
-## Limites do teste
-
-Achei o pico de forma automática só porque eu sabia que havia um par de listras
-dominante. Com várias frequências ou ruído mais complicado, a seleção teria que
-ser manual. Também não medi tempo de execução, então não sei se a FFT compensa
-frente à convolução direta para kernels pequenos.
+A transformada de Fourier não muda a imagem, só muda a forma de descrevê-la.
+Alguns problemas que são complicados no espaço, como ruído periódico, ficam
+simples no espectro. E entendi que filtrar por kernel e filtrar no espectro
+são o mesmo processo visto de dois lados.
 
 ## Referências
 
 - GONZALEZ, R. C.; WOODS, R. E. *Processamento Digital de Imagens*. 3. ed. São
   Paulo: Pearson, 2010. Capítulo 4 (filtragem no domínio da frequência).
+- COOLEY, J. W.; TUKEY, J. W. An algorithm for the machine calculation of
+  complex Fourier series. *Mathematics of Computation*, v. 19, n. 90,
+  p. 297-301, 1965.
 - NumPy. *Discrete Fourier Transform (numpy.fft)*. https://numpy.org/doc/stable/reference/routines.fft.html
 
 ---

@@ -1,113 +1,67 @@
-# Amostragem e quantização: o que sobra quando eu jogo pixels fora
+# Amostragem e quantização: como uma cena vira imagem digital
 
-*25/09/2026*
+*29/09/2026*
 
-Toda imagem digital passou por duas simplificações: foi amostrada (a cena
-contínua virou uma grade de pixels) e quantizada (a intensidade virou um
-número inteiro de poucos bits). Aqui eu aperto as duas
-coisas, menos pixels de um lado e menos níveis de cinza do outro, para ver o
-que aparece.
+Nos posts anteriores eu tratei a imagem como uma matriz de números já pronta.
+Dessa vez fui pesquisar de onde essa matriz vem. A resposta está em duas
+etapas da digitalização, a amostragem e a quantização, e cada uma joga fora um
+tipo de informação.
 
-## A pergunta
+## Amostragem
 
-Se eu reduzir a resolução ou o número de níveis, o que se perde primeiro? E
-existe um jeito de reduzir a resolução que estraga menos?
+Amostrar é escolher em quais pontos da cena eu vou medir a luz. Uma cena real é
+contínua, e o sensor da câmera só consegue medir um número finito de posições,
+organizadas numa grade. A quantidade de pontos dessa grade é a resolução
+espacial da imagem: quanto menos pontos, menos detalhe fino cabe nela.
 
-## O teste
+O ponto que mais me chamou atenção foi o aliasing. Pelo teorema de
+Nyquist-Shannon, para representar bem um detalhe que se repete, como uma
+listra, é preciso amostrar com pelo menos o dobro da frequência desse detalhe.
+Se a grade for grossa demais, o detalhe não some: ele aparece como um padrão
+falso, mais largo, que não existe na cena. O moiré que aparece ao fotografar
+uma tela ou um tecido listrado é esse efeito.
 
-Criei uma imagem de 256x256 em Python com duas metades de propósito:
+Isso também vale ao reduzir uma imagem que já existe. Descartar pixels sem
+cuidado gera aliasing, e por isso o comum é aplicar antes um filtro que
+suavize a imagem (passa-baixa) e só depois diminuir. A documentação do OpenCV,
+por exemplo, recomenda a interpolação `INTER_AREA` para reduzir imagens, que
+faz justamente uma média sobre a área de origem de cada pixel.
 
-- em cima, um degradê suave e um círculo branco (bom para ver os níveis de cinza);
-- embaixo, listras cuja frequência cresce da esquerda para a direita (bom
-  para ver o que acontece quando a grade de pixels não dá conta dos detalhes).
+## Quantização
 
-Código completo: [`codigo/amostragem_quantizacao.py`](codigo/amostragem_quantizacao.py).
+Quantizar é decidir quantos valores diferentes um pixel pode ter. Com `k` bits
+por pixel existem `L = 2^k` níveis de cinza. O padrão é 8 bits, ou 256 níveis
+(de 0 a 255). O armazenamento cresce com os dois fatores: uma imagem de `M x N`
+pixels com `k` bits ocupa `M · N · k` bits. Uma imagem de 1024x1024 com 8 bits,
+por exemplo, tem 1 MiB.
 
-![Imagem de teste](img/05/original.png)
+Reduzir os níveis tem um efeito visível em regiões de transição suave, como um
+céu ou uma parede com sombra. Em vez de um degradê contínuo aparecem faixas
+com bordas nítidas, chamadas de falsos contornos. Os livros de processamento de
+imagens costumam mostrar a mesma foto com 256, 128, 64 e assim por diante até 2
+níveis para deixar isso claro.
 
-## Como implementei
+## Resolução e níveis são coisas separadas
 
-Para reduzir a resolução por um fator `k`, testei dois jeitos:
+Uma imagem pode ter muitos pixels e poucos níveis, ou o contrário. Um
+detalhe fino se perde quando falta resolução espacial, e um degradê fica
+quebrado quando faltam níveis. Com isso entendi por que uma foto com poucos
+pixels parece "quadriculada" e uma com poucos níveis parece "pintada em faixas".
 
-```python
-def reduzir_pulando(img, k):      # fica com 1 pixel a cada k
-    return img[::k, ::k]
+## O que eu aprendi
 
-def reduzir_media(img, k):        # média de cada bloco k x k
-    h, w = img.shape
-    return img.reshape(h // k, k, w // k, k).mean(axis=(1, 3)).round().astype(np.uint8)
-```
-
-Para quantizar, divido a faixa 0 a 255 em `niveis` faixas iguais e uso o valor
-central de cada faixa:
-
-```python
-def quantizar(img, niveis):
-    passo = 256 / niveis
-    return (np.floor(img / passo) * passo + passo / 2).astype(np.uint8)
-```
-
-Depois de reduzir, amplio de volta ao tamanho original repetindo pixels, só
-para poder comparar lado a lado e calcular o PSNR contra a imagem original.
-
-## Resultados
-
-### Resolução
-
-![Comparação de reduções de resolução](img/05/amostragem.png)
-
-| Fator | Pulando pixels | Média do bloco antes |
-|---|---|---|
-| 2 | 22,52 dB | 25,52 dB |
-| 4 | 14,55 dB | 18,77 dB |
-| 8 | 11,61 dB | 15,68 dB |
-
-Pulando pixels, as listras da direita viram outro padrão: com fator 4 já
-aparecem listras grossas onde a original tinha listras finas. Isso é aliasing,
-e não é só perda de detalhe, é um padrão que não existia. Com a média do bloco
-antes de reduzir, as listras finas somem num cinza liso, o que engana menos, e
-o PSNR ficou melhor nos três fatores.
-
-### Níveis de cinza
-
-![Comparação de quantizações](img/05/quantizacao.png)
-
-| Níveis | PSNR |
-|---|---|
-| 32 | 40,89 dB |
-| 8 | 28,51 dB |
-| 4 | 22,79 dB |
-| 2 | 17,54 dB |
-
-Com 32 níveis eu não noto diferença a olho nu. O problema aparece no degradê:
-com poucos níveis ele vira degraus visíveis, os falsos contornos. Para
-enxergar melhor, recortei só a faixa do degradê:
-
-![Degraus no degradê](img/05/degraus.png)
-
-## Conclusões
-
-Reduzir a resolução sem filtrar antes cria padrões que não existem na imagem
-original. Tirar a média do bloco antes de descartar pixels é barato e evita
-boa parte disso.
-
-Sobre os níveis de cinza: até uns 32 quase não perdi nada visível, e com 8 ou
-menos o degradê já vira degrau. Cada efeito pega uma região diferente. A
-resolução estraga o que é fino e repetitivo, e a quantização estraga o que é
-liso e gradual.
-
-## Limites do teste
-
-Usei uma imagem sintética, feita para exagerar os problemas. Numa foto real o
-aliasing costuma ser menos dramático. O PSNR também não mede bem como uma
-pessoa enxerga o resultado: os falsos contornos incomodam mais do que o número
-sugere.
+Toda imagem digital já é uma aproximação, feita em duas direções: no espaço
+(amostragem) e na intensidade (quantização). Os problemas que eu via sem saber
+o nome, como o quadriculado e as faixas, são consequências diretas dessas duas
+escolhas. Fiquei com vontade de ver mais sobre o filtro antes de reduzir, que
+me pareceu a parte mais prática de tudo isso.
 
 ## Referências
 
 - GONZALEZ, R. C.; WOODS, R. E. *Processamento Digital de Imagens*. 3. ed. São
   Paulo: Pearson, 2010. Capítulo 2, seção sobre amostragem e quantização.
-- NumPy. *Array manipulation routines*. https://numpy.org/doc/stable/reference/routines.array-manipulation.html
+- OpenCV. *Geometric Image Transformations* (`cv::resize` e as opções de
+  interpolação). https://docs.opencv.org/4.x/da/d54/group__imgproc__transform.html
 
 ---
 

@@ -17,7 +17,7 @@ o que ela realmente é, e o que eu for aprendendo pelo meio.
 - [2. Como o computador "enxerga" uma imagem](02_como_o_computador_enxerga.html) — 17/08/2026
 - [3. Transformação de intensidade: o negativo de uma imagem](03_negativo_de_uma_imagem.html) — 01/09/2026
 - [4. Melhorando o contraste da foto revelada](04_melhorando_o_contraste.html) — 15/09/2026
-- [5. Amostragem e quantização: o que sobra quando eu jogo pixels fora](05_amostragem_e_quantizacao.html) — 25/09/2026
-- [6. Rotacionar uma imagem: vizinho mais próximo ou bilinear?](06_rotacao_e_interpolacao.html) — 29/09/2026
-- [7. Olhando uma imagem pelo espectro de Fourier](07_fourier_2d.html) — 13/10/2026
-- [8. Contando objetos: limiar de Otsu, morfologia e componentes conexos](08_contando_objetos.html) — 27/10/2026
+- [5. Amostragem e quantização: como uma cena vira imagem digital](05_amostragem_e_quantizacao.html) — 29/09/2026
+- [6. Transformações geométricas e interpolação](06_transformacoes_geometricas.html) — 29/09/2026
+- [7. A transformada de Fourier aplicada a imagens](07_fourier_2d.html) — 29/09/2026
+- [8. Limiarização de Otsu e morfologia matemática](08_limiarizacao_e_morfologia.html) — 29/09/2026
