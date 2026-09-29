@@ -18,6 +18,6 @@ o que ela realmente é, e o que eu for aprendendo pelo meio.
 - [3. Transformação de intensidade: o negativo de uma imagem](03_negativo_de_uma_imagem.html) — 01/09/2026
 - [4. Melhorando o contraste da foto revelada](04_melhorando_o_contraste.html) — 15/09/2026
 - [5. Amostragem e quantização: como uma cena vira imagem digital](05_amostragem_e_quantizacao.html) — 29/09/2026
-- [6. Transformações geométricas e interpolação](06_transformacoes_geometricas.html) — 29/09/2026
-- [7. A transformada de Fourier aplicada a imagens](07_fourier_2d.html) — 29/09/2026
-- [8. Limiarização de Otsu e morfologia matemática](08_limiarizacao_e_morfologia.html) — 29/09/2026
+- [6. Transformações geométricas e interpolação](06_transformacoes_geometricas.html) — 11/10/2026
+- [7. A transformada de Fourier aplicada a imagens](07_fourier_2d.html) — 25/10/2026
+- [8. Limiarização de Otsu e morfologia matemática](08_limiarizacao_e_morfologia.html) — 08/11/2026

@@ -1,6 +1,6 @@
 # Limiarização de Otsu e morfologia matemática
 
-*29/09/2026*
+*08/11/2026*
 
 Um problema comum em visão computacional é separar os objetos do fundo. Fui
 pesquisar as ferramentas mais básicas para isso: a limiarização, que decide

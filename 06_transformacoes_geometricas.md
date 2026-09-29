@@ -1,6 +1,6 @@
 # Transformações geométricas e interpolação
 
-*29/09/2026*
+*11/10/2026*
 
 Depois de mexer só nos valores dos pixels (negativo, contraste), fui pesquisar
 o outro tipo de operação: mexer na posição deles. Girar, ampliar ou deslocar

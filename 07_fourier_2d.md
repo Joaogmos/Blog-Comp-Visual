@@ -1,6 +1,6 @@
 # A transformada de Fourier aplicada a imagens
 
-*29/09/2026*
+*25/10/2026*
 
 No post 2 eu comentei que os filtros olham para a vizinhança de cada pixel. Pesquisando
 mais, descobri que existe outro jeito de olhar para o mesmo problema: em vez
