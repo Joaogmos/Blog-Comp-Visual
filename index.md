@@ -20,4 +20,4 @@ o que ela realmente é, e o que eu for aprendendo pelo meio.
 - [5. Filtros de suavização: média, gaussiano e mediana](05_filtro_de_suavizacao.html) — 25/09/2026
 - [6. Transformações geométricas e interpolação](06_transformacoes_geometricas.html) — 11/10/2026
 - [7. A transformada de Fourier aplicada a imagens](07_fourier_2d.html) — 25/10/2026
-- [8. Limiarização de Otsu e morfologia matemática](08_limiarizacao_e_morfologia.html) — 08/11/2026
+- [8. Limiarização e morfologia: separando objetos do fundo](08_limiarizacao_e_morfologia.html) — 08/11/2026
