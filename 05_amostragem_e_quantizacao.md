@@ -2,11 +2,11 @@
 
 *25/09/2026*
 
-Toda imagem digital passou por duas simplificações: foi **amostrada** (a cena
-contínua virou uma grade de pixels) e **quantizada** (a intensidade virou um
-número inteiro de poucos bits). Neste post eu quis ver na prática o que
-acontece quando aperto essas duas coisas: menos pixels de um lado, menos níveis
-de cinza do outro.
+Toda imagem digital passou por duas simplificações: foi amostrada (a cena
+contínua virou uma grade de pixels) e quantizada (a intensidade virou um
+número inteiro de poucos bits). Aqui eu aperto as duas
+coisas, menos pixels de um lado e menos níveis de cinza do outro, para ver o
+que aparece.
 
 ## A pergunta
 
@@ -18,7 +18,7 @@ existe um jeito de reduzir a resolução que estraga menos?
 Criei uma imagem de 256x256 em Python com duas metades de propósito:
 
 - em cima, um degradê suave e um círculo branco (bom para ver os níveis de cinza);
-- embaixo, listras cuja frequência **cresce da esquerda para a direita** (bom
+- embaixo, listras cuja frequência cresce da esquerda para a direita (bom
   para ver o que acontece quando a grade de pixels não dá conta dos detalhes).
 
 Código completo: [`codigo/amostragem_quantizacao.py`](codigo/amostragem_quantizacao.py).
@@ -63,10 +63,10 @@ para poder comparar lado a lado e calcular o PSNR contra a imagem original.
 | 8 | 11,61 dB | 15,68 dB |
 
 Pulando pixels, as listras da direita viram outro padrão: com fator 4 já
-aparecem listras grossas em lugares onde a original tinha listras finas. Isso é
-**aliasing**: não é só perda de detalhe, é um padrão que não existia. Fazendo a
-média do bloco antes de reduzir, as listras finas somem num cinza liso, o que é
-menos enganoso, e o PSNR também ficou melhor nos três fatores.
+aparecem listras grossas onde a original tinha listras finas. Isso é aliasing,
+e não é só perda de detalhe, é um padrão que não existia. Com a média do bloco
+antes de reduzir, as listras finas somem num cinza liso, o que engana menos, e
+o PSNR ficou melhor nos três fatores.
 
 ### Níveis de cinza
 
@@ -80,20 +80,21 @@ menos enganoso, e o PSNR também ficou melhor nos três fatores.
 | 2 | 17,54 dB |
 
 Com 32 níveis eu não noto diferença a olho nu. O problema aparece no degradê:
-com poucos níveis ele vira degraus visíveis, os **falsos contornos**. Para
+com poucos níveis ele vira degraus visíveis, os falsos contornos. Para
 enxergar melhor, recortei só a faixa do degradê:
 
 ![Degraus no degradê](img/05/degraus.png)
 
-## O que dá para concluir
+## Conclusões
 
-- Reduzir resolução sem filtrar antes gera padrões que não existem na imagem
-  original. A média do bloco antes de descartar pixels custa pouco e evita boa
-  parte disso.
-- Perder níveis de cinza dói pouco até uns 32 níveis. Abaixo de 8, o degradê
-  vira degrau.
-- Os dois efeitos atacam regiões diferentes: resolução ataca o que é fino e
-  repetitivo, quantização ataca o que é liso e gradual.
+Reduzir a resolução sem filtrar antes cria padrões que não existem na imagem
+original. Tirar a média do bloco antes de descartar pixels é barato e evita
+boa parte disso.
+
+Sobre os níveis de cinza: até uns 32 quase não perdi nada visível, e com 8 ou
+menos o degradê já vira degrau. Cada efeito pega uma região diferente. A
+resolução estraga o que é fino e repetitivo, e a quantização estraga o que é
+liso e gradual.
 
 ## Limites do teste
 

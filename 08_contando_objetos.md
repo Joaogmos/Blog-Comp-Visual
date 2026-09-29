@@ -2,10 +2,9 @@
 
 *27/10/2026*
 
-Para fechar esta série, resolvi um problema pequeno e concreto: dada uma imagem
-com vários objetos claros sobre um fundo escuro, **quantos objetos existem?**
-Dá para responder juntando três técnicas simples: escolher um limiar, limpar a
-imagem binária e contar as regiões conectadas.
+Neste post o problema é pequeno e concreto: dada uma imagem com vários objetos
+claros sobre um fundo escuro, quantos objetos existem? Dá para responder com
+um limiar, uma limpeza da imagem binária e a contagem das regiões conectadas.
 
 ## A pergunta
 
@@ -27,7 +26,7 @@ Código completo: [`codigo/contagem_objetos.py`](codigo/contagem_objetos.py).
 
 Escrevi as três etapas na mão. O OpenCV só entrou para conferir o limiar.
 
-**1. Limiar de Otsu.** Testa todos os limiares possíveis e escolhe o que
+Primeiro, o limiar de Otsu. Ele testa todos os limiares possíveis e escolhe o que
 maximiza a variância entre as duas classes (fundo e objeto), usando o
 histograma acumulado:
 
@@ -46,7 +45,7 @@ Nas 5 cenas, meu limiar deu o mesmo valor que o `cv2.threshold` com Otsu
 
 ![Histograma com o limiar](img/08/histograma.png)
 
-**2. Abertura morfológica.** Erosão seguida de dilatação com janela 3x3. A
+Depois, a abertura morfológica: erosão seguida de dilatação com janela 3x3. A
 erosão apaga estruturas menores que a janela (pontos isolados), e a dilatação
 devolve o tamanho aos objetos que sobraram.
 
@@ -55,7 +54,7 @@ def abertura(b, k=1):
     return dilatar(erodir(b, k), k)
 ```
 
-**3. Componentes conexos.** Busca em largura a partir de cada pixel branco
+Por fim, os componentes conexos, com busca em largura a partir de cada pixel branco
 ainda não visitado, marcando todos os vizinhos (4 direções) com o mesmo rótulo.
 O número de rótulos é a contagem.
 
@@ -91,13 +90,12 @@ ajuda, mas erra em mais da metade das cenas. Com σ = 45 nenhuma das duas
 combinações acerta a contagem exata, embora o erro com mediana seja bem menor
 (erro total de 159 objetos contra 1172 sem ela, somando as 20 cenas).
 
-## O que dá para concluir
+## Conclusões
 
-- Otsu escolhe um bom limiar quando há dois grupos claros de intensidade, mas
-  não limpa nada sozinho: pixel de ruído continua sendo pixel.
-- A abertura é o que transforma a imagem limiarizada em algo contável.
-- Suavizar antes (mediana) estica a faixa de ruído que o método suporta, mas
-  não resolve tudo.
+O Otsu achou um bom limiar quando há dois grupos claros de intensidade, mas
+não limpa nada sozinho, porque pixel de ruído continua sendo pixel. Quem
+deixou a imagem contável foi a abertura. A mediana antes do limiar aumenta o
+ruído que o método aguenta, mas não resolve tudo.
 
 ## Limites do teste
 

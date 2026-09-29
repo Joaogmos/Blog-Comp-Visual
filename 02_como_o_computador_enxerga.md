@@ -44,7 +44,7 @@ dela. Tudo em cima da mesma estrutura de dados.
 
 ## Referências
 
-- [ADICIONE AQUI o link do vídeo ou artigo que você usou]
+- GONZALEZ, R. C.; WOODS, R. E. *Processamento Digital de Imagens*. 3. ed. São Paulo: Pearson, 2010. Capítulos 1 e 2 (fundamentos de imagem digital).
 - Documentação do OpenCV, seção de operações básicas com imagens.
 
 ---

@@ -2,11 +2,10 @@
 
 *13/10/2026*
 
-Até aqui eu sempre tratei a imagem como uma grade de pixels. A transformada de
-Fourier propõe olhar a mesma imagem como uma soma de ondas de várias
-frequências: variação lenta é frequência baixa, detalhe fino e bordas são
-frequência alta. Neste post eu usei isso para fazer duas coisas: um filtro
-passa-baixa e a remoção de listras periódicas.
+Até aqui eu tratei a imagem como uma grade de pixels. A transformada de
+Fourier olha a mesma imagem como uma soma de ondas: variação lenta é frequência
+baixa, e detalhe fino e bordas são frequência alta. Usei isso em dois testes,
+um filtro passa-baixa e a remoção de listras periódicas.
 
 ## A pergunta
 
@@ -55,8 +54,8 @@ cruz vêm das bordas retas do retângulo e da linha.
 
 ### Passa-baixa: cortar as frequências altas
 
-Testei dois filtros no espectro: o **ideal** (zera tudo fora de um raio `r`) e o
-**gaussiano** (atenua suavemente).
+Testei dois filtros no espectro: o ideal (zera tudo fora de um raio `r`) e o
+gaussiano (atenua suavemente).
 
 ![Passa-baixa ideal e gaussiano](img/07/passa_baixa.png)
 
@@ -65,7 +64,7 @@ Testei dois filtros no espectro: o **ideal** (zera tudo fora de um raio `r`) e o
 | 10 | 20,32 dB | 21,39 dB |
 | 30 | 25,03 dB | 26,91 dB |
 
-O filtro ideal deixa **ondulações** em volta das bordas (efeito de anel,
+O filtro ideal deixa ondulações em volta das bordas (efeito de anel,
 *ringing*). Faz sentido: cortar o espectro de forma brusca equivale, no espaço,
 a convoluir com uma função que oscila. A gaussiana não tem esse problema e teve
 PSNR maior nos dois casos.
@@ -98,13 +97,13 @@ para ver um resto bem fraco de ondulação (visível na figura), porque a janela
 que zerei é pequena e as listras não caem exatamente em um único ponto do
 espectro.
 
-## O que dá para concluir
+## Conclusões
 
-- Ruído periódico é difícil de tirar no espaço, mas no espectro ele vira
-  poucos pontos, fáceis de achar e remover.
-- Filtro com corte brusco gera anel. Vale trocar por uma curva suave.
-- Filtrar no espaço com kernel e filtrar no espectro com máscara são o mesmo
-  processo visto de dois lados.
+Ruído periódico é difícil de tirar direto na imagem, mas no espectro ele vira
+poucos pontos que dá para achar e apagar. O filtro com corte brusco deixa anéis
+em volta das bordas, então vale trocar por uma curva suave. E filtrar com
+kernel no espaço ou com máscara no espectro dá o mesmo resultado, só muda o
+lado de onde se olha.
 
 ## Limites do teste
 
