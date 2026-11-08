@@ -36,8 +36,7 @@ tempo, e no HSV ela fica quase toda num canal só.
 Usei IA durante o semestre, pra programar e pra me ajudar nos posts. No projeto
 1 isso me custou nota, porque ficou na cara. O que pesou foi eu não ter revisado
 com atenção o que estava entregando. Depois disso passei a ler e a cortar mais
-antes de mandar qualquer coisa, e é por isso que esse último post eu quis
-escrever do meu jeito, mesmo que fique meio cru.
+antes de mandar qualquer coisa.
 
 Voltando ao post 1: eu tinha dito que a parte mais interessante seria ensinar a
 máquina a interpretar a imagem. Continuo achando. A diferença é que agora eu sei
